@@ -270,7 +270,7 @@ override.dispose();
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/phosphorjs/phosphor-domutil/blob/HEAD/src/index.ts#L261">index.ts:261</a></li>
+									<li>Defined in <a href="https://github.com/phosphorjs/phosphor-domutil/blob/HEAD/src/index.ts#L262">index.ts:262</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -290,15 +290,17 @@ override.dispose();
 							<h4 class="tsd-returns-title">Returns <a href="interfaces/isizelimits.html" class="tsd-signature-type">ISizeLimits</a></h4>
 							<p>The size limit data for the specified DOM node.</p>
 							<h4 id="example">Example</h4>
-							<p>import { sizeLimits } from &#39;phosphor-domutil&#39;;</p>
-							<p>var div = document.createElement(&#39;div&#39;);
-								div.style.minWidth = &#39;90px&#39;;
-							document.body.appendChild(div);</p>
-							<p>var limits = sizeLimits(div);
-								limits.minWidth;   // 90
-								limits.maxHeight;  // Infinity
-								// etc...
-							```</p>
+							<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { sizeLimits } from <span class="hljs-string">'phosphor-domutil'</span>;
+
+<span class="hljs-keyword">var</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+div.style.minWidth = <span class="hljs-string">'90px'</span>;
+<span class="hljs-built_in">document</span>.body.appendChild(div);
+
+<span class="hljs-keyword">var</span> limits = sizeLimits(div);
+limits.minWidth;   <span class="hljs-comment">// 90</span>
+limits.maxHeight;  <span class="hljs-comment">// Infinity</span>
+<span class="hljs-comment">// etc...</span>
+</code></pre>
 						</li>
 					</ul>
 				</section>
