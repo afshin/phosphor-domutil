@@ -135,7 +135,6 @@ override.dispose();
 				<p><strong>hitTest</strong></p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { hitTest } from <span class="hljs-string">'phosphor-domutil'</span>;
 
-<span class="hljs-comment">// Set up a dummy test node</span>
 <span class="hljs-keyword">var</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
 div.style.position = <span class="hljs-string">'absolute'</span>;
 div.style.left = <span class="hljs-string">'0px'</span>;
@@ -150,27 +149,25 @@ hitTest(div, <span class="hljs-number">150</span>, <span class="hljs-number">150
 				<p><strong>boxSizing</strong></p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { boxSizing } from <span class="hljs-string">'phosphor-domutil'</span>;
 
-<span class="hljs-comment">// Set up a dummy test node</span>
 <span class="hljs-keyword">var</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
-div.style.position = <span class="hljs-string">'absolute'</span>;
 div.style.borderTop = <span class="hljs-string">'solid 10px black'</span>;
 <span class="hljs-built_in">document</span>.body.appendChild(div);
 
 <span class="hljs-keyword">var</span> sizing = boxSizing(div);
-sizing.borderTop;  <span class="hljs-comment">// 10</span>
+sizing.borderTop;    <span class="hljs-comment">// 10</span>
+sizing.paddingLeft;  <span class="hljs-comment">// 0</span>
 <span class="hljs-comment">// etc...</span>
 </code></pre>
 				<p><strong>sizeLimits</strong></p>
 				<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { sizeLimits } from <span class="hljs-string">'phosphor-domutil'</span>;
 
-<span class="hljs-comment">// Set up dummy test node</span>
 <span class="hljs-keyword">var</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
-div.style.position = <span class="hljs-string">'absolute'</span>;
 div.style.minWidth = <span class="hljs-string">'90px'</span>;
 <span class="hljs-built_in">document</span>.body.appendChild(div);
 
 <span class="hljs-keyword">var</span> limits = sizeLimits(div);
-limits.minWidth;  <span class="hljs-comment">// 90</span>
+limits.minWidth;   <span class="hljs-comment">// 90</span>
+limits.maxHeight;  <span class="hljs-comment">// Infinity</span>
 <span class="hljs-comment">// etc...</span>
 </code></pre>
 			</div>
