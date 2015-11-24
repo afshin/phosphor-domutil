@@ -568,11 +568,17 @@ class DragHandler implements IDisposable {
    *
    * @param clientY - The current client Y position of the mouse.
    *
+   * @param data - A mapping of mime type to mime data. This is used
+   *   to populate the drag data object.
+   *
    * #### Notes
    * This acts as a synthetic mouse press for the cases where a drag
    * operation needs to be started from other mouse handling code.
+   *
+   * The `onDragStart` handler will not be invoked when this method
+   * is used to manually start a drag.
    */
-  start(clientX: number, clientY: number): void {
+  start(clientX: number, clientY: number, data: { [mime: string]: any }): void {
     // Do nothing if the drag is already started.
     if (this._dragData) {
       return;
@@ -582,12 +588,26 @@ class DragHandler implements IDisposable {
     this._pressX = clientX;
     this._pressY = clientY;
 
-    // Ignore the threshold for future mousemove events.
-    this._ignoreThreshold = true;
-
     // Add the document mouse listeners.
     document.addEventListener('mousemove', this, true);
     document.addEventListener('mouseup', this, true);
+
+    // Invalidate the cached drop data before starting the drag.
+    invalidateCachedDropData();
+
+    // Create the drag data and attach the ghost node.
+    this._dragData = new DragData(this.createGhost());
+    document.body.appendChild(this._dragData.ghost);
+
+    // Populate the drag data with the given mime data.
+    for (let mime in data) {
+      this._dragData.setData(mime, data[mime]);
+    }
+
+    // Move the ghost node to the new mouse position.
+    let style = this._dragData.ghost.style;
+    style.top = `${clientY}px`;
+    style.left = `${clientX}px`;
   }
 
   /**
@@ -652,18 +672,16 @@ class DragHandler implements IDisposable {
     // Check to see if the drag threshold has been exceeded, and
     // start the drag operation the first time that event occurs.
     if (!this._dragData) {
-      if (!this._ignoreThreshold) {
-        let dx = Math.abs(event.clientX - this._pressX);
-        let dy = Math.abs(event.clientY - this._pressY);
-        if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
-          return;
-        }
+      let dx = Math.abs(event.clientX - this._pressX);
+      let dy = Math.abs(event.clientY - this._pressY);
+      if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) {
+        return;
       }
 
       // Invalidate the cached drop data before starting the drag.
       invalidateCachedDropData();
 
-      // Setup the drag data and attach the ghost node.
+      // Create the drag data and attach the ghost node.
       this._dragData = new DragData(this.createGhost());
       document.body.appendChild(this._dragData.ghost);
 
@@ -732,7 +750,6 @@ class DragHandler implements IDisposable {
   private _pressY = -1;
   private _context: any;
   private _node: HTMLElement;
-  private _ignoreThreshold = false;
   private _dragData: DragData = null;
 }
 
@@ -971,12 +988,15 @@ function invalidateCachedDropData(): void {
  * Run the relevant drop handlers for the given parameters.
  */
 function runDropHandlers(action: DropHandlerAction, event: MouseEvent, data: DragData): void {
+  // TODO handle z-order for overlapping drop targets.
+
+  // Refresh the client rects and run drag leave handlers.
   for (let key in dropRegistry) {
     // Fetch common variables.
     let record = dropRegistry[key];
     let handler = record.handler;
 
-    // Compute and cache the client drop rect if necessary.
+    // Refresh the client drop rect if necessary.
     if (!record.rect) {
       record.rect = handler.node.getBoundingClientRect();
     }
@@ -986,28 +1006,35 @@ function runDropHandlers(action: DropHandlerAction, event: MouseEvent, data: Dra
       continue;
     }
 
-    // Dispatch all drag leave events first.
+    // Dispatch the drag leave event if necessary.
     if (!hitTestRect(record.rect, event.clientX, event.clientY)) {
       record.entered = false;
       runDragLeave(record.handler, event, data);
     }
   }
+
+  // Dispatch the rest of the relevant handlers.
   for (let key in dropRegistry) {
     // Fetch common variables.
     let record = dropRegistry[key];
     let handler = record.handler;
 
-    // Dispatch all other drag events.
-    if (hitTestRect(record.rect, event.clientX, event.clientY)) {
-        if (!record.entered) {
-          record.entered = true;
-          runDragEnter(record.handler, event, data);
-        }
-        if (action === DropHandlerAction.Drag) {
-          runDragOver(record.handler, event, data);
-        } else if (action === DropHandlerAction.Drop) {
-          runDrop(record.handler, event, data);
-        }
+    // Skip the non-relevant targets.
+    if (!hitTestRect(record.rect, event.clientX, event.clientY)) {
+      continue;
+    }
+
+    // Run the drag enter event if necessary.
+    if (!record.entered) {
+      record.entered = true;
+      runDragEnter(record.handler, event, data);
+    }
+
+    // Run the drag over or drop as needed.
+    if (action === DropHandlerAction.Drag) {
+      runDragOver(record.handler, event, data);
+    } else if (action === DropHandlerAction.Drop) {
+      runDrop(record.handler, event, data);
     }
   }
 }
